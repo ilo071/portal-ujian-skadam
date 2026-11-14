@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1769d2">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Portal Ujian Online | SMKN 2 Maros</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <style>
+    :root {
+      --blue: #1769d2;
+      --blue-dark: #104fa8;
+      --blue-soft: #eaf3ff;
+      --ink: #17324d;
+      --muted: #63758a;
+      --line: #dce7f3;
+      --surface: #ffffff;
+      --page: #f3f8ff;
+      --success: #13845b;
+      --danger: #c43d4d;
+      --warning: #9a6500;
+      --shadow: 0 12px 34px rgba(25, 77, 135, .09);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      padding: 18px 12px 30px;
+      background: linear-gradient(180deg, #eaf3ff 0, #f7faff 260px, #f3f8ff 100%);
+      color: var(--ink);
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      line-height: 1.5;
+    }
+    button, input, select { font: inherit; }
+    .app { width: 100%; max-width: 920px; margin: 0 auto; }
+
+    .compact-meta {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; flex-wrap: wrap; margin: 0 2px 12px;
+      color: #55718e; font-size: 11px; letter-spacing: .025em;
+    }
+    .compact-meta strong { color: #24527f; letter-spacing: .07em; }
+    .demo-ribbon {
+      display: none; padding: 4px 8px; border-radius: 999px;
+      background: #fff2cf; color: #805500; font-size: 10px; font-weight: 800;
+    }
+    .demo-ribbon.show { display: inline-flex; }
+
+    /* PWA Install Card */
+    .install-card {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 14px; margin-bottom: 14px; padding: 14px 16px;
+      border: 1px solid #bfd9fa; border-radius: 16px;
+      background: linear-gradient(135deg, #ffffff 0%, #eef6ff 100%);
+      box-shadow: 0 8px 24px rgba(23, 105, 210, .08);
+    }
+    .install-info { display: flex; align-items: center; gap: 12px; }
+    .install-icon {
+      display: flex; align-items: center; justify-content: center;
+      width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0;
+      background: var(--blue-soft); color: var(--blue); font-size: 20px; font-weight: 900;
+    }
+    .install-text strong { display: block; font-size: 14px; color: var(--ink); }
+    .install-text span { display: block; font-size: 12px; color: var(--muted); }
+    .install-btn {
+      padding: 9px 15px; border: 0; border-radius: 10px; cursor: pointer;
+      background: var(--blue); color: #fff; font-size: 12px; font-weight: 800;
+      white-space: nowrap; box-shadow: 0 4px 10px rgba(23, 105, 210, .2);
+    }
+    .install-btn:hover { background: var(--blue-dark); }
+
+    .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 12px; }
+    .violation-count {
+      display: inline-flex; margin: 0 0 12px; padding: 5px 9px;
+      border-radius: 999px; background: #fff1d6; color: #805500;
+      font-size: 11px; font-weight: 800;
+    }
+    
+    .card {
+      margin-top: 16px; padding: 21px;
+      border: 1px solid var(--line); border-radius: 18px;
+      background: var(--surface); box-shadow: var(--shadow);
+    }
+    .section-heading { margin: 0 0 4px; font-size: 18px; }
+    .section-sub { margin: 0 0 18px; color: var(--muted); font-size: 13px; }
+    .field { margin-top: 15px; }
+    label { display: block; margin-bottom: 7px; font-size: 13px; font-weight: 750; }
+    select, input {
+      width: 100%; min-height: 48px; padding: 11px 13px;
+      border: 1px solid #cbd9e8; border-radius: 11px;
+      background: #fff; color: var(--ink); outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    select:focus, input:focus {
+      border-color: var(--blue); box-shadow: 0 0 0 3px rgba(23,105,210,.13);
+    }
+    select:disabled, input:disabled { background: #f4f7fb; color: #a1b0c0; cursor: not-allowed; }
+    .hint { margin: 6px 0 0; color: var(--muted); font-size: 11px; }
+    .exam-info {
+      display: none; margin-top: 14px; padding: 14px;
+      border: 1px solid #d5e7fb; border-radius: 13px;
+      background: #f5faff;
+    }
+    .exam-info.show { display: block; }
+    .exam-title { margin: 0 0 10px; font-size: 15px; font-weight: 800; }
+    .info-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 9px; }
+    .info-item { padding: 9px; border-radius: 9px; background: #fff; }
+    .info-item small { display: block; color: var(--muted); font-size: 10px; }
+    .info-item strong { display: block; margin-top: 2px; font-size: 12px; overflow-wrap: anywhere; }
+    .btn {
+      display: inline-flex; justify-content: center; align-items: center; gap: 8px;
+      width: 100%; min-height: 48px; padding: 12px 16px;
+      border: 0; border-radius: 11px; cursor: pointer;
+      background: var(--blue); color: #fff; font-weight: 800;
+      box-shadow: 0 5px 13px rgba(23,105,210,.18);
+      transition: transform .12s, background .12s, opacity .12s;
+    }
+    .btn:hover { background: var(--blue-dark); }
+    .btn:active { transform: translateY(1px); }
+    .btn:disabled { cursor: not-allowed; opacity: .48; box-shadow: none; }
+    .btn.secondary {
+      color: var(--blue-dark); background: var(--blue-soft);
+      border: 1px solid #cfe2fa; box-shadow: none;
+    }
+    .btn.ghost {
+      color: var(--muted); background: #fff; border: 1px solid var(--line); box-shadow: none;
+    }
+    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 17px; }
+    .notice {
+      display: none; margin-top: 14px; padding: 11px 13px;
+      border-radius: 10px; font-size: 12px;
+    }
+    .notice.show { display: block; }
+    .notice.info { color: #18528c; background: #edf6ff; border: 1px solid #cfe5ff; }
+    .notice.success { color: #126344; background: #edfaf4; border: 1px solid #c9efdc; }
+    .notice.warning { color: #805500; background: #fff8e7; border: 1px solid #f3dfa7; }
+    .notice.error { color: #9d2c3b; background: #fff0f1; border: 1px solid #f4cbd0; }
+    .status-row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; flex-wrap: wrap;
+    }
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 9px; border-radius: 999px;
+      background: var(--blue-soft); color: var(--blue-dark);
+      font-size: 11px; font-weight: 800;
+    }
+    .timer {
+      display: none; margin-top: 15px; padding: 15px;
+      border-radius: 14px; color: #fff;
+      background: linear-gradient(120deg, #1769d2, #2589ef);
+    }
+    .timer.show { display: block; }
+    .timer.expired { background: linear-gradient(120deg, #a92e3d, #d44a58); }
+    .timer-label { font-size: 11px; opacity: .88; font-weight: 700; letter-spacing: .06em; }
+    .timer-value { margin-top: 2px; font-size: clamp(28px, 6vw, 39px); line-height: 1.2; font-weight: 900; font-variant-numeric: tabular-nums; letter-spacing: .04em; }
+    .exam-area { display: none; margin-top: 16px; }
+    .exam-area.show { display: block; }
+    .exam-toolbar {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 10px; flex-wrap: wrap; margin-bottom: 11px;
+    }
+    .exam-toolbar strong { font-size: 14px; }
+    .form-frame {
+      display: block; width: 100%; height: 78vh; min-height: 650px; max-height: 1050px;
+      border: 1px solid var(--line); border-radius: 13px; background: #fff;
+    }
+    .footer { padding: 18px 8px 0; text-align: center; color: #8292a5; font-size: 11px; }
+    .modal-backdrop {
+      display: none; position: fixed; z-index: 9999; inset: 0;
+      align-items: center; justify-content: center; padding: 18px;
+      background: rgba(11,31,55,.58); backdrop-filter: blur(3px);
+    }
+    .modal-backdrop.show { display: flex; }
+    .modal {
+      width: 100%; max-width: 420px; padding: 22px;
+      border-radius: 18px; background: #fff; box-shadow: 0 20px 60px rgba(0,0,0,.22);
+    }
+    .modal h2 { margin: 0 0 7px; font-size: 19px; }
+    .modal p { margin: 0 0 17px; color: var(--muted); font-size: 13px; }
+    .modal .btn { margin-top: 8px; }
+    .hidden { display: none !important; }
+    @media (max-width: 600px) {
+      body { padding: 9px 8px 22px; }
+      .card { padding: 16px; border-radius: 15px; }
+      .info-grid { grid-template-columns: 1fr 1fr; }
+      .actions { grid-template-columns: 1fr; }
+      .modal-actions { grid-template-columns: 1fr; }
+      .form-frame { height: 78vh; min-height: 620px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="compact-meta">
+      <span><strong>SMKN 2 MAROS</strong> · <span id="date-label">Tanggal ujian</span></span>
+      <span id="demo-ribbon" class="demo-ribbon">MODE SIMULASI</span>
+    </div>
+
+    <!-- BANNER INSTALL PWA (Muncul otomatis di Android Chrome) -->
+    <div id="install-banner" class="install-card hidden">
+      <div class="install-info">
+        <div class="install-icon">📲</div>
+        <div class="install-text">
+          <strong>Pasang Aplikasi Ujian</strong>
+          <span>Buka layar penuh dari layar utama tanpa bar browser.</span>
+        </div>
+      </div>
+      <button id="install-btn" class="install-btn" type="button">Pasang</button>
+    </div>
+
+    <section id="closed-card" class="card hidden">
+      <h2 class="section-heading" id="closed-title">Portal belum tersedia</h2>
+      <p class="section-sub" id="closed-message">Silakan periksa tanggal pelaksanaan ujian.</p>
+      <div class="notice info show" id="closed-date-info"></div>
+    </section>
+
+    <section id="setup-card" class="card">
+      <h2 class="section-heading">Pilih Paket Ujian</h2>
+      <p class="section-sub">Pilih jurusan terlebih dahulu, lalu pilih mata pelajaran yang tersedia untuk hari ini.</p>
+
+      <div class="field">
+        <label for="jurusan-select">Pilih Kelas / Jurusan</label>
+        <select id="jurusan-select">
+          <option value="">-- Pilih Jurusan Anda --</option>
+          <option value="TKR">XII TKR (Teknik Kendaraan Ringan)</option>
+          <option value="TSM">XII TSM (Teknik Sepeda Motor)</option>
+          <option value="TKJ A">XII TKJ A (Teknik Komputer Jaringan)</option>
+          <option value="TKJ B">XII TKJ B (Teknik Komputer Jaringan)</option>
+          <option value="DPIB">XII DPIB (Desain Pemodelan & Info Bangunan)</option>
+          <option value="DKV">XII DKV (Desain Komunikasi Visual)</option>
+          <option value="LP">XII LP (Layanan Perbankan)</option>
+          <option value="ULW">XII ULW (Usaha Layanan Wisata)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="exam-select">Daftar ujian hari ini</label>
+        <select id="exam-select" disabled>
+          <option value="">-- Pilih jurusan terlebih dahulu --</option>
+        </select>
+      </div>
+
+      <div id="exam-info" class="exam-info">
+        <p class="exam-title" id="selected-title"></p>
+        <div class="info-grid">
+          <div class="info-item"><small>Kelas</small><strong id="selected-class">-</strong></div>
+          <div class="info-item"><small>Program keahlian</small><strong id="selected-major">-</strong></div>
+          <div class="info-item"><small>Durasi</small><strong id="selected-duration">-</strong></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="token-input">Token ujian</label>
+        <input id="token-input" type="text" placeholder="Masukkan token dari guru" autocomplete="off" autocapitalize="characters" spellcheck="false" disabled>
+        <p class="hint">Perhatikan huruf kapital dan angka token yang diberikan pengawas.</p>
+      </div>
+
+      <div class="actions">
+        <button id="verify-btn" class="btn" type="button" disabled>Verifikasi Token</button>
+        <button id="reset-btn" class="btn ghost" type="button">Atur Ulang</button>
+      </div>
+      <div id="setup-notice" class="notice" role="status" aria-live="polite"></div>
+    </section>
+
+    <section id="verified-card" class="card hidden">
+      <div class="status-row">
+        <div>
+          <span class="pill">✓ Token terverifikasi</span>
+          <h2 class="section-heading" id="verified-title" style="margin-top:10px">Siap memulai ujian</h2>
+        </div>
+      </div>
+      <p class="section-sub" id="verified-sub">Periksa kembali informasi ujian sebelum memulai.</p>
+      <div class="info-grid">
+        <div class="info-item"><small>Paket ujian</small><strong id="confirm-exam">-</strong></div>
+        <div class="info-item"><small>Durasi</small><strong id="confirm-duration">-</strong></div>
+      </div>
+      <button id="start-btn" class="btn" type="button" style="margin-top:16px">Mulai Mengerjakan</button>
+      <div id="verify-notice" class="notice" role="status" aria-live="polite"></div>
+    </section>
+
+    <section id="working-card" class="card hidden">
+      <div class="status-row">
+        <div>
+          <span class="pill">Ujian sedang berlangsung</span>
+          <h2 class="section-heading" id="working-title" style="margin-top:9px">Lembar Ujian</h2>
+          <p class="section-sub" id="working-sub" style="margin-bottom:0">Kerjakan dengan teliti.</p>
+        </div>
+      </div>
+      <div id="timer-box" class="timer">
+        <div class="timer-label">SISA WAKTU</div>
+        <div id="timer-value" class="timer-value">90:00</div>
+      </div>
+      <div id="timeup-notice" class="notice warning" role="status" aria-live="polite">
+        Waktu pengerjaan portal telah habis. Jika Google Form masih terbuka, segera kirim jawaban melalui tombol Kirim pada formulir.
+      </div>
+      <div class="exam-area show">
+        <div class="exam-toolbar">
+          <strong id="form-heading">Lembar soal</strong>
+          <span class="pill" id="exam-mode-pill">Google Forms</span>
+        </div>
+        <div id="exam-content"></div>
+      </div>
+      <div class="notice info show" style="margin-top:13px">
+        Jangan menutup halaman sebelum jawaban berhasil dikirim.
+      </div>
+      <button id="finish-btn" class="btn secondary" type="button" style="margin-top:13px">Saya sudah mengirim jawaban</button>
+    </section>
+
+    <div class="footer">
+      SMK Negeri 2 Maros · Portal Ujian Online<br>
+      Gunakan token yang diberikan pengawas ruangan.
+    </div>
+  </main>
+
+  <div id="visibility-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="visibility-title">
+    <div class="modal">
+      <span id="violation-count-label" class="violation-count">Peringatan perpindahan halaman</span>
+      <h2 id="visibility-title">Mohon kembali fokus</h2>
+      <p>Portal mendeteksi halaman ujian sempat berpindah ke latar belakang. Aktivitas ini tercatat oleh sistem pengawas.</p>
+      <button id="continue-btn" class="btn" type="button">Saya Mengerti</button>
+    </div>
+  </div>
+
+  <div id="finish-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="finish-title">
+    <div class="modal">
+      <h2 id="finish-title">Konfirmasi sesi ujian</h2>
+      <p id="finish-message">Sudah mengirim jawaban melalui Google Forms? Kamu masih bisa kembali mengerjakan jika belum selesai.</p>
+      <div class="modal-actions">
+        <button id="finish-continue-btn" class="btn secondary" type="button">Lanjut Mengerjakan</button>
+        <button id="finish-home-btn" class="btn" type="button">Kembali ke Halaman Awal</button>
+      </div>
+    </div>
+  </div>
+
+  <audio id="alarm-audio" preload="auto" hidden></audio>
+
+  <script>
+    const CONFIG = {
+      namaSekolah: "SMK NEGERI 2 MAROS",
+      tanggalUjian: "2026-11-16",
+      modeDemo: false,
+
+      // WAJIB GANTI link forms.gle dengan URL panjang (docs.google.com/forms/d/e/.../viewform)
+      daftarUjian: [
+        // SENIN
+        {
+          id: "SENIN_PANCASILA", tanggal: "2026-11-16", kelas: "XII",
+          jurusan: ["TKR", "TSM", "TKJ A", "TKJ B", "DPIB", "DKV", "LP", "ULW"],
+          mapel: "Pend. Pancasila", token: "PANCASILA26", durasi: 90,
+          link: "https://forms.gle/FYNovQqu1SinDpze7"
+        },
+        {
+          id: "SENIN_BINDO", tanggal: "2026-11-16", kelas: "XII",
+          jurusan: ["TKR", "TSM", "TKJ A", "TKJ B", "DPIB", "DKV", "LP", "ULW"],
+          mapel: "Bahasa Indonesia", token: "BINDO26", durasi: 90,
+          link: "https://forms.gle/u6FiZJT5KFmBHJyH9"
+        },
+        
+        // SELASA
+        {
+          id: "SELASA_MTK_1", tanggal: "2026-11-17", kelas: "XII",
+          jurusan: ["TKR", "TSM", "DKV", "LP"],
+          mapel: "Matematika", token: "MTK26A", durasi: 90,
+          link: "https://forms.gle/LBn2KwR1iLzCrR7g9"
+        },
+        {
+          id: "SELASA_MTK_2", tanggal: "2026-11-17", kelas: "XII",
+          jurusan: ["TKJ A", "TKJ B", "DPIB", "ULW"],
+          mapel: "Matematika", token: "MTK26B", durasi: 90,
+          link: "https://forms.gle/2iat6eHBfEYAW3Ko9"
+        },
+        {
+          id: "SELASA_BING", tanggal: "2026-11-17", kelas: "XII",
+          jurusan: ["TKR", "TSM", "TKJ A", "TKJ B", "DPIB", "DKV", "LP", "ULW"],
+          mapel: "Bahasa Inggris", token: "BING26", durasi: 90,
+          link: "https://forms.gle/xNvJphoUemN6V4zf7"
+        },
+
+        // RABU
+        {
+          id: "RABU_PABP", tanggal: "2026-11-18", kelas: "XII",
+          jurusan: ["TKR", "TSM", "TKJ A", "TKJ B", "DPIB", "DKV", "LP", "ULW"],
+          mapel: "PA & BP", token: "AGAMA26", durasi: 90,
+          link: "https://forms.gle/QyjgUgyVM3pKGcLx7"
+        },
+        {
+          id: "RABU_JEPANG", tanggal: "2026-11-18", kelas: "XII",
+          jurusan: ["TKR", "TSM", "DPIB"],
+          mapel: "Bahasa Jepang", token: "JEPANG26", durasi: 90,
+          link: "https://forms.gle/eSohRpGXHaNeJ8oX6"
+        },
+        {
+          id: "RABU_ARAB_1", tanggal: "2026-11-18", kelas: "XII",
+          jurusan: ["TKJ A", "DKV"],
+          mapel: "Bahasa Arab", token: "ARAB26A", durasi: 90,
+          link: "https://forms.gle/C47v1mqXrr8RLUnq9"
+        },
+        {
+          id: "RABU_ARAB_2", tanggal: "2026-11-18", kelas: "XII",
+          jurusan: ["TKJ B", "LP", "ULW"],
+          mapel: "Bahasa Arab", token: "ARAB26B", durasi: 90,
+          link: "https://forms.gle/yK1CFkHRE1LX6hjAA"
+        },
+        {
+          id: "RABU_KIK_UMUM", tanggal: "2026-11-18", kelas: "XII",
+          jurusan: ["TKR", "TSM", "TKJ A", "TKJ B", "DPIB", "DKV", "ULW"],
+          mapel: "KIK", token: "KIK26", durasi: 75,
+          link: "https://forms.gle/JsVPwLv4vtyZEaBU8"
+        },
+        {
+          id: "RABU_KIK_LP", tanggal: "2026-11-18", kelas: "XII",
+          jurusan: ["LP"],
+          mapel: "KIK (Khusus Perbankan)", token: "KIKLP26", durasi: 75,
+          link: "https://forms.gle/hiywbK2NW2RGyTB79"
+        }
+      ]
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const state = {
+      selected: null,
+      verified: false,
+      deadline: null,
+      timerInterval: null,
+      expired: false,
+      sessionKey: null,
+      violationCount: 0,
+      isAway: false,
+      audioContext: null,
+      alarmTimer: null,
+      alarmOscillators: [],
+      ujianAktif: false
+    };
+
+    // PWA INSTALL PROMPT LOGIC
+    let deferredPrompt = null;
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const banner = $("install-banner");
+      if (banner && !state.ujianAktif) {
+        banner.classList.remove("hidden");
+      }
+    });
+
+    window.addEventListener("appinstalled", () => {
+      deferredPrompt = null;
+      const banner = $("install-banner");
+      if (banner) banner.classList.add("hidden");
+    });
+
+    function formatTanggal(isoDate) {
+      const parts = isoDate.split("-").map(Number);
+      const date = new Date(parts[0], parts[1] - 1, parts[2]);
+      return new Intl.DateTimeFormat("id-ID", {
+        weekday: "long", day: "numeric", month: "long", year: "numeric"
+      }).format(date);
+    }
+
+    function tanggalLokalHariIni() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, "0");
+      const d = String(now.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+
+    function tampilNotice(element, message, type) {
+      element.textContent = message;
+      element.className = `notice show ${type || "info"}`;
+    }
+
+    function sembunyikanNotice(element) {
+      element.textContent = "";
+      element.className = "notice";
+    }
+
+    function convertGoogleFormLink(url) {
+      if (url.includes("forms.gle")) {
+        return url;
+      } else if (url.includes("docs.google.com/forms") && !url.includes("embedded=true")) {
+        const cleanUrl = url.split("?")[0].replace("/edit", "/viewform");
+        return `${cleanUrl}?embedded=true`;
+      }
+      return url;
+    }
+
+    function init() {
+      if ($("install-btn")) {
+        $("install-btn").addEventListener("click", async () => {
+          if (!deferredPrompt) return;
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          if (outcome === "accepted") {
+            $("install-banner").classList.add("hidden");
+          }
+          deferredPrompt = null;
+        });
+      }
+
+      $("date-label").textContent = formatTanggal(CONFIG.tanggalUjian);
+      $("demo-ribbon").classList.toggle("show", CONFIG.modeDemo === true);
+
+      const hariIni = tanggalLokalHariIni();
+      if (!CONFIG.modeDemo && hariIni !== CONFIG.tanggalUjian) {
+        $("setup-card").classList.add("hidden");
+        $("closed-card").classList.remove("hidden");
+        $("closed-title").textContent = hariIni < CONFIG.tanggalUjian
+          ? "Ujian belum dimulai"
+          : "Jadwal ujian telah berakhir";
+        $("closed-message").textContent = hariIni < CONFIG.tanggalUjian
+          ? "Portal akan tersedia pada tanggal pelaksanaan yang telah ditentukan."
+          : "Tanggal pelaksanaan portal ini sudah lewat. Silakan hubungi pengawas atau admin.";
+        $("closed-date-info").textContent = `Tanggal ujian: ${formatTanggal(CONFIG.tanggalUjian)}.`;
+        return;
+      }
+
+      $("jurusan-select").addEventListener("change", filterMapel);
+      $("exam-select").addEventListener("change", pilihUjian);
+      
+      $("token-input").addEventListener("input", () => {
+        $("token-input").value = $("token-input").value.toUpperCase().replace(/\s/g, "");
+        sembunyikanNotice($("setup-notice"));
+      });
+      $("verify-btn").addEventListener("click", verifikasiToken);
+      $("reset-btn").addEventListener("click", resetPortal);
+      $("start-btn").addEventListener("click", mulaiUjian);
+      $("finish-btn").addEventListener("click", () => {
+        $("finish-message").textContent = state.expired
+          ? "Waktu portal sudah habis. Pastikan jawaban telah dikirim melalui Google Forms. Jika masih perlu memeriksa formulir, pilih Lanjut Mengerjakan."
+          : "Jika belum selesai mengerjakan atau belum menekan Kirim di Google Forms, pilih Lanjut Mengerjakan. Jika sudah selesai, kembali ke halaman awal.";
+        $("finish-modal").classList.add("show");
+      });
+      $("finish-continue-btn").addEventListener("click", () => $("finish-modal").classList.remove("show"));
+      $("finish-home-btn").addEventListener("click", resetPortal);
+      $("continue-btn").addEventListener("click", () => {
+        hentikanAlarm();
+        $("visibility-modal").classList.remove("show");
+      });
+
+      pasangDeteksiPerpindahan();
+      pulihkanSesi();
+    }
+
+    function filterMapel() {
+      const jurusanTerpilih = $("jurusan-select").value;
+      const selectMapel = $("exam-select");
+      
+      selectMapel.innerHTML = '<option value="">-- Pilih paket ujian --</option>';
+      $("token-input").disabled = true;
+      $("verify-btn").disabled = true;
+      $("token-input").value = "";
+      $("exam-info").classList.remove("show");
+      
+      if (!jurusanTerpilih) {
+        selectMapel.disabled = true;
+        selectMapel.innerHTML = '<option value="">-- Pilih jurusan terlebih dahulu --</option>';
+        return;
+      }
+      selectMapel.disabled = false;
+      const daftarHariIni = CONFIG.daftarUjian.filter(ujian => 
+        (CONFIG.modeDemo || ujian.tanggal === CONFIG.tanggalUjian) && 
+        ujian.jurusan.includes(jurusanTerpilih)
+      );
+
+      if (daftarHariIni.length === 0) {
+        selectMapel.innerHTML = '<option value="">Tidak ada ujian terjadwal untuk kelas ini</option>';
+        selectMapel.disabled = true;
+      } else {
+        daftarHariIni.forEach(ujian => {
+          const option = document.createElement("option");
+          option.value = ujian.id;
+          option.textContent = `${ujian.mapel} (${ujian.durasi} Menit)`;
+          selectMapel.appendChild(option);
+        });
+      }
+    }
+
+    function pilihUjian() {
+      const id = $("exam-select").value;
+      const jurusanTerpilih = $("jurusan-select").value;
+      state.selected = CONFIG.daftarUjian.find(item => item.id === id) || null;
+      state.verified = false;
+      
+      $("exam-info").classList.toggle("show", !!state.selected);
+      $("token-input").disabled = !state.selected;
+      $("verify-btn").disabled = !state.selected;
+      $("token-input").value = "";
+      sembunyikanNotice($("setup-notice"));
+
+      if (!state.selected) return;
+      const u = state.selected;
+      $("selected-title").textContent = u.mapel;
+      $("selected-class").textContent = u.kelas;
+      $("selected-major").textContent = jurusanTerpilih;
+      $("selected-duration").textContent = `${u.durasi} menit`;
+    }
+
+    function verifikasiToken() {
+      if (!state.selected) {
+        tampilNotice($("setup-notice"), "Pilih paket ujian terlebih dahulu.", "warning");
+        return;
+      }
+      const token = $("token-input").value.trim();
+      if (!token) {
+        tampilNotice($("setup-notice"), "Masukkan token pengawas.", "warning");
+        $("token-input").focus();
+        return;
+      }
+      if (token !== String(state.selected.token).toUpperCase()) {
+        tampilNotice($("setup-notice"), "Token salah! Periksa kembali tulisan di papan tulis.", "error");
+        $("token-input").focus();
+        return;
+      }
+
+      const jurusanTerpilih = $("jurusan-select").value;
+      state.verified = true;
+      $("setup-card").classList.add("hidden");
+      $("verified-card").classList.remove("hidden");
+      $("verified-title").textContent = state.selected.mapel;
+      $("verified-sub").textContent = `Kelas ${state.selected.kelas} ${jurusanTerpilih}`;
+      $("confirm-exam").textContent = state.selected.mapel;
+      $("confirm-duration").textContent = `${state.selected.durasi} menit`;
+      sembunyikanNotice($("verify-notice"));
+    }
+
+    function mulaiUjian() {
+      if (!state.selected || !state.verified) return;
+      siapkanAudio();
+      state.violationCount = 0;
+      state.deadline = Date.now() + Number(state.selected.durasi) * 60 * 1000;
+      state.expired = false;
+      state.sessionKey = `smkn2maros_exam_${CONFIG.tanggalUjian}_${state.selected.id}`;
+      state.ujianAktif = true;
+      if ($("install-banner")) $("install-banner").classList.add("hidden");
+      simpanSesi();
+      tampilkanAreaUjian();
+      jalankanTimer();
+    }
+
+    function tampilkanAreaUjian() {
+      const u = state.selected;
+      const jurusanTerpilih = $("jurusan-select").value;
+      
+      $("verified-card").classList.add("hidden");
+      $("setup-card").classList.add("hidden");
+      $("working-card").classList.remove("hidden");
+      
+      $("working-title").textContent = u.mapel;
+      $("working-sub").textContent = `Kelas ${u.kelas} ${jurusanTerpilih} · ${u.durasi} menit`;
+      $("form-heading").textContent = u.mapel;
+      
+      const content = $("exam-content");
+      $("exam-mode-pill").textContent = "Google Forms";
+      
+      const iframe = document.createElement("iframe");
+      iframe.className = "form-frame";
+      iframe.title = `Formulir ujian ${u.mapel}`;
+      iframe.src = convertGoogleFormLink(u.link);
+      iframe.loading = "eager";
+      iframe.referrerPolicy = "strict-origin-when-cross-origin";
+      iframe.setAttribute("allow", "clipboard-write");
+      
+      content.replaceChildren(iframe);
+      $("timer-box").classList.add("show");
+      $("timeup-notice").classList.remove("show");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function simpanSesi() {
+      if (!state.sessionKey || !state.selected || !state.deadline) return;
+      const data = {
+        examId: state.selected.id,
+        jurusan: $("jurusan-select").value,
+        deadline: state.deadline,
+        expired: state.expired,
+        violationCount: state.violationCount
+      };
+      try { localStorage.setItem(state.sessionKey, JSON.stringify(data)); } catch (_) {}
+    }
+
+    function pulihkanSesi() {
+      try {
+        const prefix = `smkn2maros_exam_${CONFIG.tanggalUjian}_`;
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (!key || !key.startsWith(prefix)) continue;
+          
+          const raw = localStorage.getItem(key);
+          const data = JSON.parse(raw || "{}");
+          const ujian = CONFIG.daftarUjian.find(item => item.id === data.examId);
+          if (!ujian || !Number.isFinite(data.deadline)) continue;
+          
+          $("jurusan-select").value = data.jurusan || "";
+          filterMapel();
+          $("exam-select").value = data.examId;
+          
+          state.selected = ujian;
+          state.deadline = data.deadline;
+          state.expired = data.expired === true || Date.now() >= data.deadline;
+          state.violationCount = Number(data.violationCount) || 0;
+          state.sessionKey = key;
+          state.verified = true;
+          state.ujianAktif = true;
+          
+          tampilkanAreaUjian();
+          jalankanTimer();
+          return;
+        }
+      } catch (_) {}
+    }
+
+    function jalankanTimer() {
+      if (state.timerInterval) clearInterval(state.timerInterval);
+      $("timer-box").classList.add("show");
+      perbaruiTimer();
+      state.timerInterval = setInterval(perbaruiTimer, 1000);
+    }
+
+    function perbaruiTimer() {
+      if (!state.deadline) return;
+      const sisa = Math.max(0, Math.ceil((state.deadline - Date.now()) / 1000));
+      const menit = Math.floor(sisa / 60);
+      const detik = sisa % 60;
+      $("timer-value").textContent =
+        `${String(menit).padStart(2, "0")}:${String(detik).padStart(2, "0")}`;
+
+      if (sisa <= 0) {
+        if (!state.expired) {
+          state.expired = true;
+          simpanSesi();
+        }
+        clearInterval(state.timerInterval);
+        $("timer-box").classList.add("expired");
+        $("timeup-notice").classList.add("show");
+      }
+    }
+
+    function resetPortal() {
+      hentikanAlarm();
+      if (state.timerInterval) clearInterval(state.timerInterval);
+      if (state.sessionKey) {
+        try { localStorage.removeItem(state.sessionKey); } catch (_) {}
+      }
+      state.selected = null;
+      state.verified = false;
+      state.deadline = null;
+      state.expired = false;
+      state.sessionKey = null;
+      state.violationCount = 0;
+      state.isAway = false;
+      state.ujianAktif = false;
+      
+      $("working-card").classList.add("hidden");
+      $("verified-card").classList.add("hidden");
+      $("finish-modal").classList.remove("show");
+      $("visibility-modal").classList.remove("show");
+      $("setup-card").classList.remove("hidden");
+      
+      $("jurusan-select").value = "";
+      filterMapel();
+      
+      $("exam-info").classList.remove("show");
+      $("token-input").value = "";
+      $("timer-box").classList.remove("expired", "show");
+      $("exam-content").replaceChildren();
+      sembunyikanNotice($("setup-notice"));
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function siapkanAudio() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        if (!state.audioContext) state.audioContext = new AudioCtx();
+        if (state.audioContext.state === "suspended") state.audioContext.resume();
+      } catch (_) {}
+    }
+
+    function hentikanAlarm() {
+      if (state.alarmTimer) { clearTimeout(state.alarmTimer); state.alarmTimer = null; }
+      state.alarmOscillators.forEach(osc => { try { osc.stop(); } catch (_) {} });
+      state.alarmOscillators = [];
+      const audioEl = $("alarm-audio");
+      if (audioEl) { try { audioEl.pause(); } catch (_) {} }
+    }
+
+    function bunyikanAlarmLimaDetik() {
+      hentikanAlarm();
+      if (state.audioContext && state.audioContext.state === "suspended") {
+        try { state.audioContext.resume(); } catch (_) {}
+      }
+      const ctx = state.audioContext;
+      const webAudioOK = ctx && ctx.state === "running";
+      if (webAudioOK) bunyikanWebAudio(ctx);
+      else bunyikanAudioFallback();
+      state.alarmTimer = setTimeout(hentikanAlarm, 5000);
+    }
+
+    function bunyikanWebAudio(ctx) {
+      const mulai = ctx.currentTime;
+      for (let t = 0; t < 5; t += 0.55) {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(880, mulai + t);
+        gain.gain.setValueAtTime(0.0001, mulai + t);
+        gain.gain.exponentialRampToValueAtTime(0.16, mulai + t + 0.025);
+        gain.gain.setValueAtTime(0.16, mulai + t + 0.16);
+        gain.gain.exponentialRampToValueAtTime(0.0001, mulai + t + 0.22);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(mulai + t);
+        osc.stop(mulai + t + 0.24);
+        state.alarmOscillators.push(osc);
+      }
+    }
+
+    function bunyikanAudioFallback() {
+      const audioEl = $("alarm-audio");
+      if (!audioEl) return;
+      if (!audioEl.src) audioEl.src = buatBeepWavDataURI(880, 0.3, 0.3);
+      audioEl.loop = true; audioEl.volume = 0.6;
+      audioEl.play().catch(() => {});
+    }
+
+    function buatBeepWavDataURI(frekuensi, durasiDetik, volume) {
+      const sampleRate = 8000; const totalSample = Math.floor(sampleRate * durasiDetik);
+      const buffer = new ArrayBuffer(44 + totalSample); const view = new DataView(buffer);
+      const tulisString = (offset, str) => { for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i)); };
+      tulisString(0, "RIFF"); view.setUint32(4, 36 + totalSample, true);
+      tulisString(8, "WAVE"); tulisString(12, "fmt "); view.setUint32(16, 16, true);
+      view.setUint16(20, 1, true); view.setUint16(22, 1, true);
+      view.setUint32(24, sampleRate, true); view.setUint32(28, sampleRate, true);
+      view.setUint16(32, 1, true); view.setUint16(34, 8, true);
+      tulisString(36, "data"); view.setUint32(40, totalSample, true);
+      const amp = Math.max(0, Math.min(1, volume)) * 127;
+      for (let i = 0; i < totalSample; i++) {
+        const t = i / sampleRate;
+        const env = Math.min(1, i / 200) * Math.min(1, (totalSample - i) / 200);
+        const nilai = Math.sin(2 * Math.PI * frekuensi * t) * amp * env;
+        view.setUint8(44 + i, Math.round(128 + nilai));
+      }
+      let binary = ""; const bytes = new Uint8Array(buffer);
+      for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+      return `data:audio/wav;base64,${btoa(binary)}`;
+    }
+
+    function catatPerpindahanHalaman() {
+      state.violationCount += 1;
+      simpanSesi();
+      if (state.violationCount > 3) {
+        $("violation-count-label").textContent = `Peringatan perpindahan halaman ke-${state.violationCount}`;
+        $("visibility-modal").classList.add("show");
+        bunyikanAlarmLimaDetik();
+        if (navigator.vibrate) { try { navigator.vibrate([200, 100, 200, 100, 200]); } catch (_) {} }
+      }
+    }
+
+    function pasangDeteksiPerpindahan() {
+      document.addEventListener("visibilitychange", () => {
+        if (!state.ujianAktif || state.expired) return;
+        if (document.visibilityState === "hidden") {
+          state.isAway = true;
+        } else if (document.visibilityState === "visible") {
+          if (state.isAway) {
+            state.isAway = false;
+            catatPerpindahanHalaman();
+          }
+        }
+      });
+
+      window.addEventListener("blur", () => {
+        if (!state.ujianAktif || state.expired) return;
+        setTimeout(() => {
+          if (document.activeElement && document.activeElement.tagName === "IFRAME") {
+            return;
+          }
+          state.isAway = true;
+        }, 50);
+      });
+
+      window.addEventListener("focus", () => {
+        if (!state.ujianAktif || state.expired) return;
+        if (state.isAway) {
+          state.isAway = false;
+          if (document.visibilityState === "visible") {
+            catatPerpindahanHalaman();
+          }
+        }
+      });
+    }
+
+    // REGISTRASI SERVICE WORKER PWA
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js").catch(() => {});
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>
