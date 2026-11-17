@@ -4,7 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#1769d2">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Portal Ujian Online | SMKN 2 Maros</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
   <style>
     :root {
       --blue: #1769d2;
@@ -44,13 +48,46 @@
       background: #fff2cf; color: #805500; font-size: 10px; font-weight: 800;
     }
     .demo-ribbon.show { display: inline-flex; }
+
+    /* GATEKEEPER CARD (TAMPILAN AWAL KHUSUS BROWSER) */
+    .gate-card {
+      margin-top: 24px; padding: 28px 22px; text-align: center;
+      border: 1px solid #cfe2fa; border-radius: 22px;
+      background: #ffffff; box-shadow: 0 16px 40px rgba(23, 105, 210, .12);
+    }
+    .gate-badge {
+      display: inline-block; padding: 5px 12px; border-radius: 999px;
+      background: var(--blue-soft); color: var(--blue-dark);
+      font-size: 11px; font-weight: 800; letter-spacing: .06em;
+    }
+    .gate-icon {
+      display: flex; align-items: center; justify-content: center;
+      width: 68px; height: 68px; margin: 16px auto 14px;
+      border-radius: 20px; background: linear-gradient(135deg, #1769d2, #3b93f7);
+      color: #fff; font-size: 32px; box-shadow: 0 10px 22px rgba(23, 105, 210, .25);
+    }
+    .gate-card h1 { margin: 0 0 8px; font-size: 21px; color: var(--ink); }
+    .gate-card p { margin: 0 auto 20px; max-width: 400px; color: var(--muted); font-size: 13px; }
+    .gate-steps {
+      text-align: left; margin: 16px 0 0; padding: 14px 16px;
+      border-radius: 14px; background: #f5f9ff; border: 1px solid #dce9fa;
+      font-size: 12px; color: var(--ink);
+    }
+    .gate-steps strong { display: block; margin-bottom: 6px; color: var(--blue-dark); }
+    .gate-steps ol { margin: 0; padding-left: 18px; }
+    .gate-steps li { margin-bottom: 4px; }
+    .bypass-link {
+      display: inline-block; margin-top: 18px; padding: 6px 10px;
+      color: var(--muted); font-size: 11px; text-decoration: underline;
+      background: none; border: 0; cursor: pointer;
+    }
+
     .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 12px; }
     .violation-count {
       display: inline-flex; margin: 0 0 12px; padding: 5px 9px;
       border-radius: 999px; background: #fff1d6; color: #805500;
       font-size: 11px; font-weight: 800;
     }
-    
     .card {
       margin-top: 16px; padding: 21px;
       border: 1px solid var(--line); border-radius: 18px;
@@ -84,8 +121,8 @@
     .info-item strong { display: block; margin-top: 2px; font-size: 12px; overflow-wrap: anywhere; }
     .btn {
       display: inline-flex; justify-content: center; align-items: center; gap: 8px;
-      width: 100%; min-height: 48px; padding: 12px 16px;
-      border: 0; border-radius: 11px; cursor: pointer;
+      width: 100%; min-height: 50px; padding: 12px 16px;
+      border: 0; border-radius: 12px; cursor: pointer;
       background: var(--blue); color: #fff; font-weight: 800;
       box-shadow: 0 5px 13px rgba(23,105,210,.18);
       transition: transform .12s, background .12s, opacity .12s;
@@ -172,16 +209,42 @@
       <span id="demo-ribbon" class="demo-ribbon">MODE SIMULASI</span>
     </div>
 
+    <!-- 1. GERBANG UTAMA: HANYA MUNCUL JIKA DIBUKA DI BROWSER BIASA -->
+    <section id="install-gate-card" class="gate-card hidden">
+      <span class="gate-badge">LANGKAH 1 · INSTALASI PORTAL</span>
+      <div class="gate-icon">📲</div>
+      <h1>Pasang Aplikasi Ujian</h1>
+      <p>Untuk mencegah ujian tertutup tidak sengaja dan menjaga tampilan layar penuh, pasang aplikasi ini ke layar utama HP kamu terlebih dahulu.</p>
+
+      <button id="gate-install-btn" class="btn hidden" type="button" style="font-size: 15px;">
+        PASANG APP SEKARANG
+      </button>
+
+      <div id="gate-manual-guide" class="gate-steps">
+        <strong>Cara Pasang di HP Kamu:</strong>
+        <ol>
+          <li><strong>Android (Chrome):</strong> Ketuk ikon <b>titik tiga (⋮)</b> di pojok kanan atas &rarr; pilih <b>Tambahkan ke Layar Utama</b> / <b>Instal Aplikasi</b>.</li>
+          <li><strong>iPhone (Safari):</strong> Ketuk ikon <b>Share (kotak panah atas)</b> di bawah &rarr; pilih <b>Add to Home Screen</b>.</li>
+          <li>Setelah terpasang, <b>tutup browser ini</b> dan buka ujian melalui ikon <b>Ujian SMKN2</b> di layar utama HP.</li>
+        </ol>
+      </div>
+
+      <button id="bypass-gate-btn" class="bypass-link" type="button">
+        Sudah terpasang / HP tidak mendukung? Lanjut masuk ujian di sini &rarr;
+      </button>
+    </section>
+
+    <!-- 2. KARTU JADWAL BELUM MULAI / SUDAH BERAKHIR -->
     <section id="closed-card" class="card hidden">
       <h2 class="section-heading" id="closed-title">Portal belum tersedia</h2>
       <p class="section-sub" id="closed-message">Silakan periksa tanggal pelaksanaan ujian.</p>
       <div class="notice info show" id="closed-date-info"></div>
     </section>
 
-    <!-- SETUP CARD: MENU CASCADING FILTER JURUSAN & MAPEL -->
-    <section id="setup-card" class="card">
+    <!-- 3. PORTAL UTAMA UJIAN -->
+    <section id="setup-card" class="card hidden">
       <h2 class="section-heading">Pilih Paket Ujian</h2>
-      <p class="section-sub">Pilih jurusan terlebih dahulu, lalu pilih mata pelajaran yang tersedia untuk hari ini.</p>
+      <p class="section-sub">Pilih jurusan terlebih dahulu, lalu pilih mata pelajaran sesuai sesi yang berlangsung.</p>
 
       <div class="field">
         <label for="jurusan-select">Pilih Kelas / Jurusan</label>
@@ -224,6 +287,11 @@
         <button id="verify-btn" class="btn" type="button" disabled>Verifikasi Token</button>
         <button id="reset-btn" class="btn ghost" type="button">Atur Ulang</button>
       </div>
+
+      <button id="exit-app-btn" class="btn ghost" type="button" style="margin-top: 10px; color: #c43d4d; border-color: #f4cbd0;">
+        Keluar dari Aplikasi
+      </button>
+
       <div id="setup-notice" class="notice" role="status" aria-live="polite"></div>
     </section>
 
@@ -261,7 +329,7 @@
       <div class="exam-area show">
         <div class="exam-toolbar">
           <strong id="form-heading">Lembar soal</strong>
-          <span class="pill" id="exam-mode-pill">SKADAM NET</span>
+          <span class="pill" id="exam-mode-pill">Google Forms</span>
         </div>
         <div id="exam-content"></div>
       </div>
@@ -277,15 +345,29 @@
     </div>
   </main>
 
+  <!-- MODAL PERINGATAN PERPINDAHAN LAYAR (KE-3 S.D. KE-6) -->
   <div id="visibility-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="visibility-title">
     <div class="modal">
       <span id="violation-count-label" class="violation-count">Peringatan perpindahan halaman</span>
       <h2 id="visibility-title">Mohon kembali fokus</h2>
-      <p>Portal mendeteksi halaman ujian sempat berpindah ke latar belakang. Aktivitas ini tercatat oleh sistem pengawas.</p>
+      <p>Portal mendeteksi halaman ujian sempat berpindah ke latar belakang atau jendela lain. Jika mencapai 7 kali pelanggaran, layar ujian akan terkunci otomatis.</p>
       <button id="continue-btn" class="btn" type="button">Saya Mengerti</button>
     </div>
   </div>
 
+  <!-- MODAL KUNCI OTOMATIS PENGAWAS (SAAT MENCAPAI PELANGGARAN KE-7) -->
+  <div id="lock-modal" class="modal-backdrop" role="dialog" aria-modal="true" style="background: rgba(130, 18, 32, 0.94); z-index: 99999;">
+    <div class="modal" style="border: 2px solid #c43d4d; text-align: center;">
+      <span class="violation-count" style="background: #ffe0e3; color: #9d2c3b;">SESI UJIAN TERKUNCI OTOMATIS</span>
+      <h2 style="color: #9d2c3b;">Batas Pelanggaran Tercapai</h2>
+      <p>Kamu terdeteksi meninggalkan halaman ujian sebanyak 7 kali. Sesi dibekukan sementara dan waktu tetap berjalan. <b>Serahkan HP ke Pengawas Ruangan</b> untuk membuka kunci.</p>
+      <input id="supervisor-pin-input" type="password" placeholder="Masukkan PIN Pengawas" autocomplete="off" autocapitalize="characters" style="text-align: center; font-weight: 800; letter-spacing: .15em; margin-bottom: 8px;">
+      <button id="unlock-btn" class="btn" type="button" style="background: #c43d4d;">Buka Kunci (Khusus Pengawas)</button>
+      <div id="lock-notice" class="notice error"></div>
+    </div>
+  </div>
+
+  <!-- MODAL KONFIRMASI SELESAI -->
   <div id="finish-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="finish-title">
     <div class="modal">
       <h2 id="finish-title">Konfirmasi sesi ujian</h2>
@@ -300,98 +382,135 @@
   <audio id="alarm-audio" preload="auto" hidden></audio>
 
   <script>
-    /*
-      ============================================================
-      AREA KONFIGURASI ADMIN 
-      ============================================================
-    */
     const CONFIG = {
       namaSekolah: "SMK NEGERI 2 MAROS",
-      tanggalUjian: "2026-11-17", // UBAH TANGGAL INI SETIAP HARI SEBELUM UJIAN
+      tanggalUjian: "2026-11-18", // UBAH KE "2026-11-19" MALAM INI UNTUK JADWAL KAMIS
       modeDemo: false,
+      wajibPasangApp: true,
 
-      // PENTING: GANTI SEMUA LINK forms.gle DI BAWAH MENJADI LINK PANJANG ASLINYA
-      // (Buka form asli -> Send -> Link -> Jangan centang 'perpendek URL')
+      // PENGATURAN KEAMANAN & PENGAWASAN
+      maxPelanggaran: 7,       // Otomatis kunci layar pada pelanggaran ke-7
+      pinPengawas: "123123",   // PIN rahasia pengawas untuk membuka kunci layar
+
+      // DAFTAR UJIAN AKTIF (RABU 18 NOV & KAMIS 19 NOV 2026)
       daftarUjian: [
-        // SENIN
-        {
-          id: "SENIN_PANCASILA", tanggal: "2026-11-16", kelas: "XII",
-          jurusan: ["TKR", "TSM", "TKJ A", "TKJ B", "DPIB", "DKV", "LP", "ULW"],
-          mapel: "Pend. Pancasila", token: "TULISMI", durasi: 90,
-          link: "https://docs.google.com/forms/d/e/1FAIpQLSciz0h8CHwBEFtDq7v4lzXHbt5NNJ9JuK6IHe4OTzvPgzULLQ/viewform" // GANTI DENGAN LINK PANJANG!
-        },
-        {
-          id: "SENIN_BINDO", tanggal: "2026-11-16", kelas: "XII",
-          jurusan: ["TKR", "TSM", "TKJ A", "TKJ B", "DPIB", "DKV", "LP", "ULW"],
-          mapel: "Bahasa Indonesia", token: "HUJANG", durasi: 90,
-          link: "https://docs.google.com/forms/d/e/1FAIpQLSd_QKgRcj87PQZGBs0B187SG9yrHa6geLbYnmclgTT20xq9Ig/viewform" // GANTI DENGAN LINK PANJANG!
-        },
-        
-        // SELASA
-        {
-          id: "SELASA_MTK_1", tanggal: "2026-11-17", kelas: "XII",
-          jurusan: ["TKR", "TSM", "DKV", "LP"],
-          mapel: "Matematika", token: "CAKARKI", durasi: 90,
-          link: "https://docs.google.com/forms/d/e/1FAIpQLSc1sph2bMSaV-vpt07OnXCeX3HjBvLv2tCUNwijPTon3qR6_A/viewform" // GANTI DENGAN LINK PANJANG!
-        },
-        {
-          id: "SELASA_MTK_2", tanggal: "2026-11-17", kelas: "XII",
-          jurusan: ["TKJ A", "TKJ B", "DPIB", "ULW"],
-          mapel: "Matematika", token: "CAKARKI", durasi: 90,
-          link: "https://docs.google.com/forms/d/e/1FAIpQLSeKndPbtfOjJcwb5-u-nkXG8FdoY6NdcISkGjjTnmKXcTgtjg/viewform" // GANTI DENGAN LINK PANJANG!
-        },
-        {
-          id: "SELASA_BING", tanggal: "2026-11-17", kelas: "XII",
-          jurusan: ["TKR", "TSM", "TKJ A", "TKJ B", "DPIB", "DKV", "LP", "ULW"],
-          mapel: "Bahasa Inggris", token: "LONDON", durasi: 90,
-          link: "https://docs.google.com/forms/d/e/1FAIpQLSfaW2JDVwcft0AvsR6aO1ObE6hLgYqFblvq-sH-zAZwzQD3jg/viewform" // GANTI DENGAN LINK PANJANG!
-        },
-
-        // RABU
+        // ============================================================
+        // RABU, 18 NOVEMBER 2026
+        // ============================================================
         {
           id: "RABU_PABP", tanggal: "2026-11-18", kelas: "XII",
           jurusan: ["TKR", "TSM", "TKJ A", "TKJ B", "DPIB", "DKV", "LP", "ULW"],
-          mapel: "PA & BP", token: "MAYIT", durasi: 90,
-          link: "https://docs.google.com/forms/d/e/1FAIpQLSdg4xUaz84hR8kf-KeJm7zgbN8UXlg2FNa_68p_LJIzjFgpXA/viewform7" // GANTI DENGAN LINK PANJANG!
+          mapel: "Sesi 1 · PA & BP", token: "MAYIT", durasi: 90,
+          link: "https://forms.gle/QyjgUgyVM3pKGcLx7"
         },
         {
           id: "RABU_JEPANG", tanggal: "2026-11-18", kelas: "XII",
           jurusan: ["TKR", "TSM", "DPIB"],
-          mapel: "Bahasa Jepang", token: "KONOHA", durasi: 90,
-          link: "https://docs.google.com/forms/d/e/1FAIpQLSfGyIL4SryQ7GQLAqh-tsXv5_ELagtDepA_arp6Lj6UmbrYyg/viewform" // GANTI DENGAN LINK PANJANG!
+          mapel: "Sesi 2 · Bahasa Jepang", token: "KONOHA", durasi: 90,
+          link: "https://forms.gle/eSohRpGXHaNeJ8oX6"
         },
         {
           id: "RABU_ARAB_1", tanggal: "2026-11-18", kelas: "XII",
           jurusan: ["TKJ A", "DKV"],
-          mapel: "Bahasa Arab", token: "KITABU", durasi: 90,
-          link: "https://docs.google.com/forms/d/e/1FAIpQLSeLKeXW6b3LollwLPAYvfQOLV_gGAKp2DKsvVh3U6p18EHpgA/viewform" // GANTI DENGAN LINK PANJANG!
+          mapel: "Sesi 2 · Bahasa Arab", token: "KITABU", durasi: 90,
+          link: "https://forms.gle/C47v1mqXrr8RLUnq9"
         },
         {
           id: "RABU_ARAB_2", tanggal: "2026-11-18", kelas: "XII",
           jurusan: ["TKJ B", "LP", "ULW"],
-          mapel: "Bahasa Arab", token: "KITABU", durasi: 90,
-          link: "https://docs.google.com/forms/d/e/1FAIpQLSdXej3-kQqBKYEII9JNOsIKeiozXvVcchaTWS_noNemZGnr9Q/viewform" // GANTI DENGAN LINK PANJANG!
+          mapel: "Sesi 2 · Bahasa Arab", token: "KITABU", durasi: 90,
+          link: "https://forms.gle/yK1CFkHRE1LX6hjAA"
         },
         {
           id: "RABU_KIK_UMUM", tanggal: "2026-11-18", kelas: "XII",
-          jurusan: ["TKR", "TSM", "TKJ A", "TKJ B", "DPIB", "DKV", "ULW"],
-          mapel: "KIK", token: "KERJAMI", durasi: 75,
-          link: "https://docs.google.com/forms/d/e/1FAIpQLScB1xJDF_PtQdWLU99srTg2foIkOovSwkOSuxUmwY8aiO_p4A/viewform" // GANTI DENGAN LINK PANJANG!
+          jurusan: ["TKR", "TSM", "TKJ A", "TKJ B", "DKV", "ULW"],
+          mapel: "Sesi 3 · KIK", token: "KERJAMI", durasi: 75,
+          link: "https://forms.gle/JsVPwLv4vtyZEaBU8"
         },
         {
           id: "RABU_KIK_LP", tanggal: "2026-11-18", kelas: "XII",
           jurusan: ["LP"],
-          mapel: "KIK (Khusus Perbankan)", token: "KERJAMI", durasi: 75,
-          link: "https://docs.google.com/forms/d/e/1FAIpQLSeZ2wIiUpYUZ3sTpn2wuRjNUOi_wuVyz2QD-_4PyoiNZ0If6A/viewform" // GANTI DENGAN LINK PANJANG!
+          mapel: "Sesi 3 · KIK (Perbankan)", token: "KERJAMI", durasi: 75,
+          link: "https://forms.gle/hiywbK2NW2RGyTB79"
+        },
+        {
+          id: "RABU_KIK_DPIB", tanggal: "2026-11-18", kelas: "XII",
+          jurusan: ["DPIB"],
+          mapel: "Sesi 3 · KIK (DPIB)", token: "KERJAMI", durasi: 75,
+          link: "https://docs.google.com/forms/d/e/1FAIpQLSdk5dEW6LCvBE-mz5tx_EIgtLUOJKpedwDDZ8O4xvcSld8O4g/viewform"
+        },
+
+        // ============================================================
+        // KAMIS, 19 NOVEMBER 2026 (3 SESI)
+        // ============================================================
+        // --- SESI 1 (07.30 - 09.00 | 90 Menit) ---
+        {
+          id: "KAMIS_S1_MULOK", tanggal: "2026-11-19", kelas: "XII",
+          jurusan: ["TKR", "TSM", "TKJ A", "TKJ B", "DPIB", "DKV", "LP", "ULW"],
+          mapel: "Sesi 1 · Mulok", token: "CEKDEK", durasi: 90,
+          link: "https://docs.google.com/forms/d/e/1FAIpQLSfKcrhx7YQ8n6tKHPSajy9xa1MM8W3-7xVExfJ9wmB57eHoVw/viewform"
+        },
+
+        // --- SESI 2 (09.00 - 10.30 | 90 Menit) ---
+        {
+          id: "KAMIS_S2_KK4_TKR", tanggal: "2026-11-19", kelas: "XII",
+          jurusan: ["TKR"],
+          mapel: "Sesi 2 · KK4 TKR", token: "SESI2", durasi: 90,
+          link: "https://docs.google.com/forms/d/e/1FAIpQLSfwAgf6kOnsq-HFOYTu_HWe2zkZ4mYZW3qq44-h-Uyrpl492Q/viewform"
+        },
+        {
+          id: "KAMIS_S2_KK4_TSM", tanggal: "2026-11-19", kelas: "XII",
+          jurusan: ["TSM"],
+          mapel: "Sesi 2 · KK4 TSM", token: "SESI2", durasi: 90,
+          link: "https://docs.google.com/forms/d/e/1FAIpQLSc38doMO8FM_NUmBeTxEQkUhSb8mijZClByM4NnVETqa1tP2Q/viewform"
+        },
+        {
+          id: "KAMIS_S2_KK4_TKJ", tanggal: "2026-11-19", kelas: "XII",
+          jurusan: ["TKJ A", "TKJ B"],
+          mapel: "Sesi 2 · KK4 TKJ", token: "SESI2", durasi: 90,
+          link: "https://docs.google.com/forms/d/e/1FAIpQLSf5lJPnKDA_6OtWWtjaRsKBfomL-p4xN4hDX1OCDdiibKAGPQ/viewform"
+        },
+        {
+          id: "KAMIS_S2_KK5_DPIB", tanggal: "2026-11-19", kelas: "XII",
+          jurusan: ["DPIB"],
+          mapel: "Sesi 2 · KK5 DPIB", token: "SESI2", durasi: 90,
+          link: "https://docs.google.com/forms/d/e/1FAIpQLSfH2S6oEmg7JTsGJ7lJ9Q7TO_7zrUPPOJ2XT9h34BQuJVyFgQ/viewform"
+        },
+        {
+          id: "KAMIS_S2_KK2_LP", tanggal: "2026-11-19", kelas: "XII",
+          jurusan: ["LP"],
+          mapel: "Sesi 2 · KK2 LP", token: "SESI2", durasi: 90,
+          link: "https://docs.google.com/forms/d/e/1FAIpQLScZlY9weAFYBkg3_IS1MZYVu4S_KNsnXyXArjocNyPqfHrC6w/viewform"
+        },
+
+        // --- SESI 3 (11.00 - 12.15 | 75 Menit) ---
+        {
+          id: "KAMIS_S3_KK5_TKR", tanggal: "2026-11-19", kelas: "XII",
+          jurusan: ["TKR"],
+          mapel: "Sesi 3 · KK5 TKR", token: "PULANG", durasi: 75,
+          link: "https://docs.google.com/forms/d/e/1FAIpQLSdcPI-FCq8yvbvdf6TTIYzpTtHeSeOado8vJD2oTWT19fo-EA/viewform"
+        },
+        {
+          id: "KAMIS_S3_KK5_TSM", tanggal: "2026-11-19", kelas: "XII",
+          jurusan: ["TSM"],
+          mapel: "Sesi 3 · KK5 TSM", token: "PULANG", durasi: 75,
+          link: "https://docs.google.com/forms/d/e/1FAIpQLSfE4B7DiDYZC9IH3vj4xtoFao9fcqSOmgkFGZ6xYxiDg428Jg/viewform"
+        },
+        {
+          id: "KAMIS_S3_KK5_TKJ", tanggal: "2026-11-19", kelas: "XII",
+          jurusan: ["TKJ A", "TKJ B"],
+          mapel: "Sesi 3 · KK5 TKJ", token: "PULANG", durasi: 75,
+          link: "https://docs.google.com/forms/d/e/1FAIpQLSeiU6xoK8yr_UD4UiRvLM3cNtEGY6ZfHTVFB3jcwAwHMtk0xQ/viewform"
+        },
+        {
+          id: "KAMIS_S3_KK6_DPIB", tanggal: "2026-11-19", kelas: "XII",
+          jurusan: ["DPIB"],
+          mapel: "Sesi 3 · KK6 DPIB", token: "PULANG", durasi: 75,
+          link: "https://docs.google.com/forms/d/e/1FAIpQLSfJzGdgAkS71UpU-j8W3-7-KGYdZUnelokpPReF-AuAid1_sA/viewform"
         }
       ]
     };
 
-    /*
-      ============================================================
-      SISTEM LOGIKA PORTAL
-      ============================================================
-    */
     const $ = (id) => document.getElementById(id);
     const state = {
       selected: null,
@@ -401,12 +520,41 @@
       expired: false,
       sessionKey: null,
       violationCount: 0,
-      isAway: false, // FLAG BARU: Mengatasi Double Count (Bug 1)
+      isAway: false,
+      isLocked: false,
+      isSmallWindow: false,
       audioContext: null,
       alarmTimer: null,
       alarmOscillators: [],
       ujianAktif: false
     };
+
+    function cekModeAplikasi() {
+      const ua = navigator.userAgent.toLowerCase();
+      return (
+        window.matchMedia("(display-mode: standalone)").matches ||
+        window.navigator.standalone === true ||
+        ua.includes("median") ||
+        ua.includes("gonative")
+      );
+    }
+
+    let deferredPrompt = null;
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const btn = $("gate-install-btn");
+      if (btn) btn.classList.remove("hidden");
+    });
+
+    window.addEventListener("appinstalled", () => {
+      deferredPrompt = null;
+      const btn = $("gate-install-btn");
+      if (btn) {
+        btn.textContent = "✓ TERPASANG! BUKA DARI LAYAR UTAMA";
+        btn.disabled = true;
+      }
+    });
 
     function formatTanggal(isoDate) {
       const parts = isoDate.split("-").map(Number);
@@ -435,9 +583,8 @@
     }
 
     function convertGoogleFormLink(url) {
-      if (url.includes("forms.gle")) {
-        return url; 
-      } else if (url.includes("docs.google.com/forms") && !url.includes("embedded=true")) {
+      if (url.includes("forms.gle")) return url;
+      if (url.includes("docs.google.com/forms") && !url.includes("embedded=true")) {
         const cleanUrl = url.split("?")[0].replace("/edit", "/viewform");
         return `${cleanUrl}?embedded=true`;
       }
@@ -448,23 +595,55 @@
       $("date-label").textContent = formatTanggal(CONFIG.tanggalUjian);
       $("demo-ribbon").classList.toggle("show", CONFIG.modeDemo === true);
 
+      $("gate-install-btn").addEventListener("click", async () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        await deferredPrompt.userChoice;
+        deferredPrompt = null;
+      });
+
+      $("bypass-gate-btn").addEventListener("click", () => {
+        $("install-gate-card").classList.add("hidden");
+        bukaPortalUjian();
+      });
+
+      pasangListenerPortal();
+
+      if (cekSesiAktifDiStorage()) {
+        pulihkanSesi();
+        return;
+      }
+
+      if (CONFIG.wajibPasangApp && !cekModeAplikasi()) {
+        $("install-gate-card").classList.remove("hidden");
+        return;
+      }
+
+      bukaPortalUjian();
+    }
+
+    function bukaPortalUjian() {
       const hariIni = tanggalLokalHariIni();
       if (!CONFIG.modeDemo && hariIni !== CONFIG.tanggalUjian) {
         $("setup-card").classList.add("hidden");
         $("closed-card").classList.remove("hidden");
         $("closed-title").textContent = hariIni < CONFIG.tanggalUjian
-          ? "Ujian belum dimulai"
+          ? "Aplikasi Siap! Ujian belum dimulai"
           : "Jadwal ujian telah berakhir";
         $("closed-message").textContent = hariIni < CONFIG.tanggalUjian
-          ? "Portal akan tersedia pada tanggal pelaksanaan yang telah ditentukan."
+          ? "Aplikasi portal sudah terpasang dengan benar. Silakan buka kembali pada jadwal ujian di bawah ini."
           : "Tanggal pelaksanaan portal ini sudah lewat. Silakan hubungi pengawas atau admin.";
-        $("closed-date-info").textContent = `Tanggal ujian: ${formatTanggal(CONFIG.tanggalUjian)}.`;
+        $("closed-date-info").textContent = `Jadwal Ujian: ${formatTanggal(CONFIG.tanggalUjian)}.`;
         return;
       }
 
+      $("setup-card").classList.remove("hidden");
+    }
+
+    function pasangListenerPortal() {
       $("jurusan-select").addEventListener("change", filterMapel);
       $("exam-select").addEventListener("change", pilihUjian);
-      
+
       $("token-input").addEventListener("input", () => {
         $("token-input").value = $("token-input").value.toUpperCase().replace(/\s/g, "");
         sembunyikanNotice($("setup-notice"));
@@ -472,6 +651,7 @@
       $("verify-btn").addEventListener("click", verifikasiToken);
       $("reset-btn").addEventListener("click", resetPortal);
       $("start-btn").addEventListener("click", mulaiUjian);
+
       $("finish-btn").addEventListener("click", () => {
         $("finish-message").textContent = state.expired
           ? "Waktu portal sudah habis. Pastikan jawaban telah dikirim melalui Google Forms. Jika masih perlu memeriksa formulir, pilih Lanjut Mengerjakan."
@@ -485,28 +665,75 @@
         $("visibility-modal").classList.remove("show");
       });
 
+      // Buka kunci pengawas
+      $("supervisor-pin-input").addEventListener("input", () => {
+        $("supervisor-pin-input").value = $("supervisor-pin-input").value.toUpperCase().replace(/\s/g, "");
+        sembunyikanNotice($("lock-notice"));
+      });
+
+      $("unlock-btn").addEventListener("click", () => {
+        const pin = $("supervisor-pin-input").value.trim().toUpperCase();
+        if (pin !== String(CONFIG.pinPengawas).toUpperCase()) {
+          tampilNotice($("lock-notice"), "PIN Pengawas salah!", "error");
+          return;
+        }
+        state.isLocked = false;
+        state.violationCount = 0;
+        simpanSesi();
+        $("lock-modal").classList.remove("show");
+      });
+
+      // Penahan tombol Back / Gesture Swipe Android saat ujian aktif
+      window.addEventListener("popstate", () => {
+        if (state.ujianAktif) {
+          history.pushState({ ujian: true }, "", location.href);
+          const notice = $("timeup-notice");
+          if (notice && !state.expired) {
+            notice.textContent = "Tombol Kembali dinonaktifkan selama ujian berlangsung. Gunakan tombol 'Saya sudah mengirim jawaban' jika sudah selesai.";
+            notice.classList.add("show");
+            setTimeout(() => {
+              if (!state.expired) {
+                notice.classList.remove("show");
+                notice.textContent = "Waktu pengerjaan portal telah habis. Jika Google Form masih terbuka, segera kirim jawaban melalui tombol Kirim pada formulir.";
+              }
+            }, 4000);
+          }
+        }
+      });
+
+      // Tombol Keluar Aplikasi
+      $("exit-app-btn").addEventListener("click", () => {
+        if (window.median && median.app && median.app.exit) {
+          median.app.exit();
+        } else if (window.gonative && gonative.app && gonative.app.exit) {
+          gonative.app.exit();
+        } else {
+          window.close();
+          tampilNotice($("setup-notice"), "Silakan tekan tombol Home atau tutup aplikasi dari Recent Apps HP.", "info");
+        }
+      });
+
       pasangDeteksiPerpindahan();
-      pulihkanSesi();
     }
 
     function filterMapel() {
       const jurusanTerpilih = $("jurusan-select").value;
       const selectMapel = $("exam-select");
-      
+
       selectMapel.innerHTML = '<option value="">-- Pilih paket ujian --</option>';
       $("token-input").disabled = true;
       $("verify-btn").disabled = true;
       $("token-input").value = "";
       $("exam-info").classList.remove("show");
-      
+
       if (!jurusanTerpilih) {
         selectMapel.disabled = true;
         selectMapel.innerHTML = '<option value="">-- Pilih jurusan terlebih dahulu --</option>';
         return;
       }
       selectMapel.disabled = false;
-      const daftarHariIni = CONFIG.daftarUjian.filter(ujian => 
-        (CONFIG.modeDemo || ujian.tanggal === CONFIG.tanggalUjian) && 
+      const daftarHariIni = CONFIG.daftarUjian.filter(ujian =>
+        (CONFIG.modeDemo || ujian.tanggal === CONFIG.tanggalUjian) &&
         ujian.jurusan.includes(jurusanTerpilih)
       );
 
@@ -528,7 +755,7 @@
       const jurusanTerpilih = $("jurusan-select").value;
       state.selected = CONFIG.daftarUjian.find(item => item.id === id) || null;
       state.verified = false;
-      
+
       $("exam-info").classList.toggle("show", !!state.selected);
       $("token-input").disabled = !state.selected;
       $("verify-btn").disabled = !state.selected;
@@ -539,7 +766,7 @@
       const u = state.selected;
       $("selected-title").textContent = u.mapel;
       $("selected-class").textContent = u.kelas;
-      $("selected-major").textContent = jurusanTerpilih; 
+      $("selected-major").textContent = jurusanTerpilih;
       $("selected-duration").textContent = `${u.durasi} menit`;
     }
 
@@ -575,10 +802,12 @@
       if (!state.selected || !state.verified) return;
       siapkanAudio();
       state.violationCount = 0;
+      state.isLocked = false;
       state.deadline = Date.now() + Number(state.selected.durasi) * 60 * 1000;
       state.expired = false;
       state.sessionKey = `smkn2maros_exam_${CONFIG.tanggalUjian}_${state.selected.id}`;
       state.ujianAktif = true;
+      history.pushState({ ujian: true }, "", location.href);
       simpanSesi();
       tampilkanAreaUjian();
       jalankanTimer();
@@ -587,18 +816,19 @@
     function tampilkanAreaUjian() {
       const u = state.selected;
       const jurusanTerpilih = $("jurusan-select").value;
-      
+
+      $("install-gate-card").classList.add("hidden");
       $("verified-card").classList.add("hidden");
       $("setup-card").classList.add("hidden");
       $("working-card").classList.remove("hidden");
-      
+
       $("working-title").textContent = u.mapel;
       $("working-sub").textContent = `Kelas ${u.kelas} ${jurusanTerpilih} · ${u.durasi} menit`;
       $("form-heading").textContent = u.mapel;
-      
+
       const content = $("exam-content");
       $("exam-mode-pill").textContent = "Google Forms";
-      
+
       const iframe = document.createElement("iframe");
       iframe.className = "form-frame";
       iframe.title = `Formulir ujian ${u.mapel}`;
@@ -606,14 +836,13 @@
       iframe.loading = "eager";
       iframe.referrerPolicy = "strict-origin-when-cross-origin";
       iframe.setAttribute("allow", "clipboard-write");
-      
+
       content.replaceChildren(iframe);
       $("timer-box").classList.add("show");
       $("timeup-notice").classList.remove("show");
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    /* FIX BUG 3: Ganti sessionStorage menjadi localStorage */
     function simpanSesi() {
       if (!state.sessionKey || !state.selected || !state.deadline) return;
       const data = {
@@ -621,9 +850,21 @@
         jurusan: $("jurusan-select").value,
         deadline: state.deadline,
         expired: state.expired,
-        violationCount: state.violationCount
+        violationCount: state.violationCount,
+        isLocked: state.isLocked
       };
       try { localStorage.setItem(state.sessionKey, JSON.stringify(data)); } catch (_) {}
+    }
+
+    function cekSesiAktifDiStorage() {
+      try {
+        const prefix = `smkn2maros_exam_${CONFIG.tanggalUjian}_`;
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith(prefix)) return true;
+        }
+      } catch (_) {}
+      return false;
     }
 
     function pulihkanSesi() {
@@ -632,25 +873,32 @@
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i);
           if (!key || !key.startsWith(prefix)) continue;
-          
+
           const raw = localStorage.getItem(key);
           const data = JSON.parse(raw || "{}");
           const ujian = CONFIG.daftarUjian.find(item => item.id === data.examId);
           if (!ujian || !Number.isFinite(data.deadline)) continue;
-          
+
           $("jurusan-select").value = data.jurusan || "";
           filterMapel();
           $("exam-select").value = data.examId;
-          
+
           state.selected = ujian;
           state.deadline = data.deadline;
           state.expired = data.expired === true || Date.now() >= data.deadline;
           state.violationCount = Number(data.violationCount) || 0;
+          state.isLocked = data.isLocked === true;
           state.sessionKey = key;
           state.verified = true;
-          
+          state.ujianAktif = true;
+          history.pushState({ ujian: true }, "", location.href);
+
           tampilkanAreaUjian();
           jalankanTimer();
+
+          if (state.isLocked) {
+            kunciSesiUjian();
+          }
           return;
         }
       } catch (_) {}
@@ -695,17 +943,20 @@
       state.sessionKey = null;
       state.violationCount = 0;
       state.isAway = false;
+      state.isLocked = false;
+      state.isSmallWindow = false;
       state.ujianAktif = false;
-      
+
       $("working-card").classList.add("hidden");
       $("verified-card").classList.add("hidden");
       $("finish-modal").classList.remove("show");
       $("visibility-modal").classList.remove("show");
+      $("lock-modal").classList.remove("show");
       $("setup-card").classList.remove("hidden");
-      
+
       $("jurusan-select").value = "";
-      filterMapel(); 
-      
+      filterMapel();
+
       $("exam-info").classList.remove("show");
       $("token-input").value = "";
       $("timer-box").classList.remove("expired", "show");
@@ -792,58 +1043,88 @@
       return `data:audio/wav;base64,${btoa(binary)}`;
     }
 
+    function kunciSesiUjian() {
+      state.isLocked = true;
+      simpanSesi();
+      hentikanAlarm();
+      $("visibility-modal").classList.remove("show");
+      $("finish-modal").classList.remove("show");
+      $("supervisor-pin-input").value = "";
+      sembunyikanNotice($("lock-notice"));
+      $("lock-modal").classList.add("show");
+    }
+
     function catatPerpindahanHalaman() {
+      if (state.isLocked) return;
       state.violationCount += 1;
       simpanSesi();
-      if (state.violationCount > 3) {
-        $("violation-count-label").textContent = `Peringatan perpindahan halaman ke-${state.violationCount}`;
+
+      if (state.violationCount >= CONFIG.maxPelanggaran) {
+        kunciSesiUjian();
+        return;
+      }
+
+      if (state.violationCount >= 3) {
+        $("violation-count-label").textContent =
+          `Peringatan ke-${state.violationCount} dari ${CONFIG.maxPelanggaran} (Otomatis terkunci di ke-${CONFIG.maxPelanggaran})`;
         $("visibility-modal").classList.add("show");
         bunyikanAlarmLimaDetik();
-        if (navigator.vibrate) { try { navigator.vibrate([200, 100, 200, 100, 200]); } catch (_) {} }
+        if (navigator.vibrate) { try { navigator.vibrate([250, 100, 250, 100, 250]); } catch (_) {} }
       }
     }
 
-    /* FIX BUG 1 & 2: Logika Anti Double-Count & Proteksi Iframe Click */
     function pasangDeteksiPerpindahan() {
-      
-      // Event 1: Ketika tab browser diminimize atau dipindah
+      let iframeSudahAktif = false;
+
       document.addEventListener("visibilitychange", () => {
-        if (!state.ujianAktif || state.expired) return;
-        
+        if (!state.ujianAktif || state.expired || state.isLocked) return;
         if (document.visibilityState === "hidden") {
-          state.isAway = true; 
-        } else if (document.visibilityState === "visible") {
-          if (state.isAway) {
-            state.isAway = false;
-            catatPerpindahanHalaman(); // Hitung pelanggaran saat kembali
-          }
+          state.isAway = true;
+        } else if (document.visibilityState === "visible" && state.isAway) {
+          state.isAway = false;
+          iframeSudahAktif = false;
+          catatPerpindahanHalaman();
         }
       });
 
-      // Event 2: Ketika window browser kehilangan fokus (contoh: Alt-Tab desktop atau klik iframe)
       window.addEventListener("blur", () => {
-        if (!state.ujianAktif || state.expired) return;
-        
-        // Jeda 50ms (Trik sakti agar browser sempat mengenali bahwa yang diklik adalah Iframe Form)
+        if (!state.ujianAktif || state.expired || state.isLocked) return;
         setTimeout(() => {
-          if (document.activeElement && document.activeElement.tagName === "IFRAME") {
-            return; // Batalkan pelanggaran karena ini cuma klik ngerjain soal
+          const isIframe = document.activeElement && document.activeElement.tagName === "IFRAME";
+          if (isIframe && !iframeSudahAktif) {
+            iframeSudahAktif = true;
+            return;
           }
           state.isAway = true;
-        }, 50);
+        }, 60);
       });
 
-      // Event 3: Ketika window browser kembali difokuskan
       window.addEventListener("focus", () => {
-        if (!state.ujianAktif || state.expired) return;
-        
-        if (state.isAway) {
+        if (!state.ujianAktif || state.expired || state.isLocked) return;
+        iframeSudahAktif = false;
+        if (state.isAway && document.visibilityState === "visible") {
           state.isAway = false;
-          // Pastikan tab memang sedang terbuka (Mencegah double-trigger dengan visibilitychange)
-          if (document.visibilityState === "visible") {
-            catatPerpindahanHalaman(); 
-          }
+          catatPerpindahanHalaman();
         }
+      });
+
+      // Deteksi Floating Window / Split Screen (lebar jendela menyusut)
+      window.addEventListener("resize", () => {
+        if (!state.ujianAktif || state.expired || state.isLocked) return;
+        if (window.innerWidth < window.screen.availWidth * 0.82) {
+          if (!state.isSmallWindow) {
+            state.isSmallWindow = true;
+            catatPerpindahanHalaman();
+          }
+        } else {
+          state.isSmallWindow = false;
+        }
+      });
+    }
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js").catch(() => {});
       });
     }
 
