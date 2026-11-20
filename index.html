@@ -382,90 +382,131 @@
   <audio id="alarm-audio" preload="auto" hidden></audio>
 
   <script>
-const CONFIG = {
+    const CONFIG = {
       namaSekolah: "SMK NEGERI 2 MAROS",
-      tanggalUjian: "2026-11-20",
+      tanggalUjian: "2026-11-19", // UBAH KE "2026-11-19" MALAM INI UNTUK JADWAL KAMIS
       modeDemo: false,
       wajibPasangApp: true,
 
       // PENGATURAN KEAMANAN & PENGAWASAN
-      maxPelanggaran: 7,
-      pinPengawas: "12345",
+      maxPelanggaran: 7,       // Otomatis kunci layar pada pelanggaran ke-7
+      pinPengawas: "7777777",   // PIN rahasia pengawas untuk membuka kunci layar
 
-      // DAFTAR UJIAN AKTIF (JUMAT, 20 NOVEMBER 2026)
+      // DAFTAR UJIAN AKTIF (RABU 18 NOV & KAMIS 19 NOV 2026)
       daftarUjian: [
         // ============================================================
-        // SESI 1 (JUMAT, 20 NOVEMBER 2026)
+        // RABU, 18 NOVEMBER 2026
         // ============================================================
         {
-          id: "JUMAT_S1_KK2_ULW", tanggal: "2026-11-20", kelas: "XII",
-          jurusan: ["ULW"],
-          mapel: "Sesi 1 · KK 2 ULW", token: "JUMATTT", durasi: 90,
-          link: "https://docs.google.com/forms/d/e/1FAIpQLScFAadwGJHBHawnPNmKALM-87RZJjKMiShfhdR-G9JsHKO56Q/viewform"
+          id: "RABU_PABP", tanggal: "2026-11-18", kelas: "XII",
+          jurusan: ["TKR", "TSM", "TKJ A", "TKJ B", "DPIB", "DKV", "LP", "ULW"],
+          mapel: "Sesi 1 · PA & BP", token: "MAYIT", durasi: 90,
+          link: "https://forms.gle/QyjgUgyVM3pKGcLx7"
         },
         {
-          id: "JUMAT_S1_KK3_LP", tanggal: "2026-11-20", kelas: "XII",
+          id: "RABU_JEPANG", tanggal: "2026-11-18", kelas: "XII",
+          jurusan: ["TKR", "TSM", "DPIB"],
+          mapel: "Sesi 2 · Bahasa Jepang", token: "KONOHA", durasi: 90,
+          link: "https://forms.gle/eSohRpGXHaNeJ8oX6"
+        },
+        {
+          id: "RABU_ARAB_1", tanggal: "2026-11-18", kelas: "XII",
+          jurusan: ["TKJ A", "DKV"],
+          mapel: "Sesi 2 · Bahasa Arab", token: "KITABU", durasi: 90,
+          link: "https://forms.gle/C47v1mqXrr8RLUnq9"
+        },
+        {
+          id: "RABU_ARAB_2", tanggal: "2026-11-18", kelas: "XII",
+          jurusan: ["TKJ B", "LP", "ULW"],
+          mapel: "Sesi 2 · Bahasa Arab", token: "KITABU", durasi: 90,
+          link: "https://forms.gle/yK1CFkHRE1LX6hjAA"
+        },
+        {
+          id: "RABU_KIK_UMUM", tanggal: "2026-11-18", kelas: "XII",
+          jurusan: ["TKR", "TSM", "TKJ A", "TKJ B", "DKV", "ULW"],
+          mapel: "Sesi 3 · KIK", token: "KERJAMI", durasi: 75,
+          link: "https://forms.gle/JsVPwLv4vtyZEaBU8"
+        },
+        {
+          id: "RABU_KIK_LP", tanggal: "2026-11-18", kelas: "XII",
           jurusan: ["LP"],
-          mapel: "Sesi 1 · KK 3 LP", token: "JUMATTT", durasi: 90,
-          link: "https://docs.google.com/forms/d/e/1FAIpQLSeH_MUS8hglxIJwwpJS3gVkwqpiLyS582B3FAzHUu_A08wLEA/viewform"
+          mapel: "Sesi 3 · KIK (Perbankan)", token: "KERJAMI", durasi: 75,
+          link: "https://forms.gle/hiywbK2NW2RGyTB79"
         },
         {
-          id: "JUMAT_S1_KK7_DKV", tanggal: "2026-11-20", kelas: "XII",
-          jurusan: ["DKV"],
-          mapel: "Sesi 1 · KK 7 DKV", token: "JUMATTT", durasi: 90,
-          link: "https://docs.google.com/forms/d/e/1FAIpQLSe_1FJT54gSh9vFk7sjKUKguAs33ynx_-bw295M_gw52abTDg/viewform"
-        },
-        {
-          id: "JUMAT_S1_KK7_DPIB", tanggal: "2026-11-20", kelas: "XII",
+          id: "RABU_KIK_DPIB", tanggal: "2026-11-18", kelas: "XII",
           jurusan: ["DPIB"],
-          mapel: "Sesi 1 · KK 7 DPIB", token: "JUMATTT", durasi: 90,
-          link: "https://docs.google.com/forms/d/e/1FAIpQLScDBsK8UEj1Fkm4swwP-yK24idUlzZs6GTNRUs4Uqn7vPIA2g/viewform"
-        },
-        {
-          id: "JUMAT_S1_KK6_TKJ", tanggal: "2026-11-20", kelas: "XII",
-          jurusan: ["TKJ A", "TKJ B"],
-          mapel: "Sesi 1 · KK 6 TKJ", token: "JUMATTT", durasi: 90,
-          link: "https://docs.google.com/forms/d/e/1FAIpQLScjmv_KmjZQH-xATmOuOx8wvR27FrqLk0a9K9sbSV_dAML_Qw/viewform"
-        },
-        {
-          id: "JUMAT_S1_KK7_TSM", tanggal: "2026-11-20", kelas: "XII",
-          jurusan: ["TSM"],
-          mapel: "Sesi 1 · KK 7 TSM", token: "JUMATTT", durasi: 90,
-          link: "https://docs.google.com/forms/d/e/1FAIpQLSdsM1FGj4Mh2qlM3pKS0CqasMj-nzYrLnr-pZutWUDQnvQAnQ/viewform"
-        },
-        {
-          id: "JUMAT_S1_KK6_TKR", tanggal: "2026-11-20", kelas: "XII",
-          jurusan: ["TKR"],
-          mapel: "Sesi 1 · KK 6 TKR", token: "JUMATTT", durasi: 90,
-          link: "https://docs.google.com/forms/d/e/1FAIpQLSeXFAs0ajI-BRb7WKs2qGstJhqS0f-h3qSICH5mTyBgQlPcdQ/viewform"
+          mapel: "Sesi 3 · KIK (DPIB)", token: "KERJAMI", durasi: 75,
+          link: "https://docs.google.com/forms/d/e/1FAIpQLSdk5dEW6LCvBE-mz5tx_EIgtLUOJKpedwDDZ8O4xvcSld8O4g/viewform"
         },
 
         // ============================================================
-        // SESI 2 (JUMAT, 20 NOVEMBER 2026)
+        // KAMIS, 19 NOVEMBER 2026 (3 SESI)
         // ============================================================
+        // --- SESI 1 (07.30 - 09.00 | 90 Menit) ---
         {
-          id: "JUMAT_S2_KK7_TKJ", tanggal: "2026-11-20", kelas: "XII",
-          jurusan: ["TKJ A", "TKJ B"],
-          mapel: "Sesi 2 · KK 7 TKJ", token: "SKADAM", durasi: 75,
-          link: "https://docs.google.com/forms/d/e/1FAIpQLScnI5Ghb2oXqTXtoEqN96hznUFQt3KsrGvRGQNIcsKK1u40KA/viewform"
+          id: "KAMIS_S1_MULOK", tanggal: "2026-11-19", kelas: "XII",
+          jurusan: ["TKR", "TSM", "TKJ A", "TKJ B", "DPIB", "DKV", "LP", "ULW"],
+          mapel: "Sesi 1 · Mulok", token: "CEKDEK", durasi: 90,
+          link: "https://docs.google.com/forms/d/e/1FAIpQLSfKcrhx7YQ8n6tKHPSajy9xa1MM8W3-7xVExfJ9wmB57eHoVw/viewform"
+        },
+
+        // --- SESI 2 (09.00 - 10.30 | 90 Menit) ---
+        {
+          id: "KAMIS_S2_KK4_TKR", tanggal: "2026-11-19", kelas: "XII",
+          jurusan: ["TKR"],
+          mapel: "Sesi 2 · KK4 TKR", token: "SESI2", durasi: 90,
+          link: "https://docs.google.com/forms/d/e/1FAIpQLSfwAgf6kOnsq-HFOYTu_HWe2zkZ4mYZW3qq44-h-Uyrpl492Q/viewform"
         },
         {
-          id: "JUMAT_S2_KK4_LP", tanggal: "2026-11-20", kelas: "XII",
-          jurusan: ["LP"],
-          mapel: "Sesi 2 · KK 4 LP", token: "SKADAM", durasi: 75,
-          link: "https://docs.google.com/forms/d/e/1FAIpQLSfdAmvXvRM7gAKIzJLyAgDUk1D4szeIMa0KjR3LAwtooxT8nQ/viewform"
-        },
-           {
-          id: "JUMAT_S2_KK6_TSM", tanggal: "2026-11-20", kelas: "XII",
+          id: "KAMIS_S2_KK4_TSM", tanggal: "2026-11-19", kelas: "XII",
           jurusan: ["TSM"],
-          mapel: "Sesi 2 · KK 6 TSM", token: "SKADAM", durasi: 75,
-          link: "https://docs.google.com/forms/d/e/1FAIpQLSdBHbAuzShZ1z4-DXuEi2pPdazUWuInFVTGPIg_NTZdccqhTg/viewform"
+          mapel: "Sesi 2 · KK4 TSM", token: "SESI2", durasi: 90,
+          link: "https://docs.google.com/forms/d/e/1FAIpQLSc38doMO8FM_NUmBeTxEQkUhSb8mijZClByM4NnVETqa1tP2Q/viewform"
         },
         {
-          id: "JUMAT_S2_KK8_DPIB", tanggal: "2026-11-20", kelas: "XII",
+          id: "KAMIS_S2_KK4_TKJ", tanggal: "2026-11-19", kelas: "XII",
+          jurusan: ["TKJ A", "TKJ B"],
+          mapel: "Sesi 2 · KK4 TKJ", token: "SESI2", durasi: 90,
+          link: "https://docs.google.com/forms/d/e/1FAIpQLSf5lJPnKDA_6OtWWtjaRsKBfomL-p4xN4hDX1OCDdiibKAGPQ/viewform"
+        },
+        {
+          id: "KAMIS_S2_KK5_DPIB", tanggal: "2026-11-19", kelas: "XII",
           jurusan: ["DPIB"],
-          mapel: "Sesi 2 · KK 8 DPIB", token: "SKADAM", durasi: 75,
-          link: "https://docs.google.com/forms/d/e/1FAIpQLScG-1bpRTCRSqsjOFAr_Ce4R5GvP9Xg61QdUmo_hF5LT78-qA/viewform"
+          mapel: "Sesi 2 · KK5 DPIB", token: "SESI2", durasi: 90,
+          link: "https://docs.google.com/forms/d/e/1FAIpQLSfH2S6oEmg7JTsGJ7lJ9Q7TO_7zrUPPOJ2XT9h34BQuJVyFgQ/viewform"
+        },
+        {
+          id: "KAMIS_S2_KK2_LP", tanggal: "2026-11-19", kelas: "XII",
+          jurusan: ["LP"],
+          mapel: "Sesi 2 · KK2 LP", token: "SESI2", durasi: 90,
+          link: "https://docs.google.com/forms/d/e/1FAIpQLScZlY9weAFYBkg3_IS1MZYVu4S_KNsnXyXArjocNyPqfHrC6w/viewform"
+        },
+
+        // --- SESI 3 (11.00 - 12.15 | 75 Menit) ---
+        {
+          id: "KAMIS_S3_KK5_TKR", tanggal: "2026-11-19", kelas: "XII",
+          jurusan: ["TKR"],
+          mapel: "Sesi 3 · KK5 TKR", token: "PULANG", durasi: 75,
+          link: "https://docs.google.com/forms/d/e/1FAIpQLSdcPI-FCq8yvbvdf6TTIYzpTtHeSeOado8vJD2oTWT19fo-EA/viewform"
+        },
+        {
+          id: "KAMIS_S3_KK5_TSM", tanggal: "2026-11-19", kelas: "XII",
+          jurusan: ["TSM"],
+          mapel: "Sesi 3 · KK5 TSM", token: "PULANG", durasi: 75,
+          link: "https://docs.google.com/forms/d/e/1FAIpQLSfE4B7DiDYZC9IH3vj4xtoFao9fcqSOmgkFGZ6xYxiDg428Jg/viewform"
+        },
+        {
+          id: "KAMIS_S3_KK5_TKJ", tanggal: "2026-11-19", kelas: "XII",
+          jurusan: ["TKJ A", "TKJ B"],
+          mapel: "Sesi 3 · KK5 TKJ", token: "PULANG", durasi: 75,
+          link: "https://docs.google.com/forms/d/e/1FAIpQLSeiU6xoK8yr_UD4UiRvLM3cNtEGY6ZfHTVFB3jcwAwHMtk0xQ/viewform"
+        },
+        {
+          id: "KAMIS_S3_KK6_DPIB", tanggal: "2026-11-19", kelas: "XII",
+          jurusan: ["DPIB"],
+          mapel: "Sesi 3 · KK6 DPIB", token: "PULANG", durasi: 75,
+          link: "https://docs.google.com/forms/d/e/1FAIpQLSfJzGdgAkS71UpU-j8W3-7-KGYdZUnelokpPReF-AuAid1_sA/viewform"
         }
       ]
     };
